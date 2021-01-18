@@ -4,6 +4,8 @@
     box-sizing: border-box;
 }
 
+/* base */
+
 body {
     background: #F1F1F1;
     display: flex;
@@ -15,6 +17,20 @@ main {
     flex: 1;
 }
 
+/* store */
+
+.storelist img {
+    height: 150px;
+    object-fit: contain;
+}
+
+/* staff */
+.stafflist img{
+    height: 250px;
+    object-fit: contain;
+}
+
+/* profile */
 .card-profile {
     width: 700px;
     border: 0;

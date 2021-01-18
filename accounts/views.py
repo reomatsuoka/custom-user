@@ -18,16 +18,18 @@ class ProfileEditView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user_data = CustomUser.objects.get(id=request.user.id)
         form = ProfileForm(
-            request.POST or None, 
+            request.POST or None,
             initial={
                 'first_name': user_data.first_name,
                 'last_name': user_data.last_name,
-                'department': user_data.department
+                'description': user_data.description,
+                'image': user_data.image
             }
         )
 
-        return render(request, 'accounts/profile_edit.html',{
+        return render(request, 'accounts/profile_edit.html', {
             'form': form,
+            'user_data': user_data
         })
 
     def post(self, request, *args, **kwargs):
@@ -36,12 +38,14 @@ class ProfileEditView(LoginRequiredMixin, View):
             user_data = CustomUser.objects.get(id=request.user.id)
             user_data.first_name = form.cleaned_data['first_name']
             user_data.last_name = form.cleaned_data['last_name']
-            user_data.department = form.cleaned_data['department']
+            user_data.description = form.cleaned_data['description']
+            if request.FILES.get('image'):
+                user_data.image = request.FILES.get('image')
             user_data.save()
             return redirect('profile')
 
-        return render(request, 'accounts/profile.html',{
-            'form': form,
+        return render(request, 'accounts/profile.html', {
+            'form': form
         })
 
 class LoginView(views.LoginView):
