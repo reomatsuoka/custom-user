@@ -6,6 +6,7 @@ from datetime import datetime, date, timedelta, time
 from django.db.models import Q
 from django.utils.timezone import localtime, make_aware
 from app.forms import BookingForm
+from django.views.decorators.http import require_POST
 
 
 # class IndexView(LoginRequiredMixin, TemplateView):
@@ -17,8 +18,9 @@ class StoreView(View):
         if request.user.is_authenticated:
             start_date = date.today()
             weekday = start_date.weekday()
+            # カレンダー日曜日開始
             if weekday != 6:
-                start_date = start_date = timedelta(days=weekday + 1)
+                start_date = start_date - timedelta(days=weekday + 1)
             return redirect('mypage', start_date.year, start_date.month, start_date.day)
 
         store_data = Store.objects.all()
@@ -160,9 +162,9 @@ class MyPageView(LoginRequiredMixin, View):
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
             local_time = localtime(booking.start)
-            booking_data = local_time.date()
+            booking_date = local_time.date()
             booking_hour = local_time.hour
-            if (booking_hour in calendar) and (booking_data in calendar[booking_hour]):
+            if (booking_hour in calendar) and (booking_date in calendar[booking_hour]):
                 calendar[booking_hour][booking_date] = booking.first_name
 
         return render(request, 'app/mypage.html', {
@@ -178,3 +180,38 @@ class MyPageView(LoginRequiredMixin, View):
             'month': month,
             'day': day,
         })
+
+@require_POST
+def Holiday(request, year, month, day, hour):
+    staff_data = Staff.objects.get(id=request.user.id)
+    start_time = make_aware(datetime(year=year, month=month, day=day, hour=hour))
+    end_time = make_aware(datetime(year=year, month=month, day=day, hour=hour + 1))
+
+    # 休日追加
+    Booking.objects.create(
+        staff=staff_data,
+        start=start_time,
+        end=end_time,
+    )
+
+    start_date = date(year=year, month=month, day=day)
+    weekday = start_date.weekday()
+    # カレンダー日曜日開始
+    if weekday != 6:
+        start_date = start_date - timedelta(days=weekday + 1)
+    return redirect('mypage', year=start_date.year, month=start_date.month, day=start_date.day)
+
+@require_POST
+def Delete(request, year, month, day, hour):
+    start_time = make_aware(datetime(year=year, month=month, day=day, hour=hour))
+    booking_data = Booking.objects.filter(start=start_time)
+
+    # 予約削除
+    booking_data.delete()
+
+    start_date = date(year=year, month=month, day=day)
+    weekday = start_date.weekday()
+    # カレンダー日曜日開始
+    if weekday != 6:
+        start_date = start_date - timedelta(days=weekday + 1)
+    return redirect('mypage', year=start_date.year, month=start_date.month, day=start_date.day)

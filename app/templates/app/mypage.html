@@ -39,9 +39,20 @@
                     {% for datetime, book in booking_date.items %}
                     <td>
                         {% if book == "" %}
-                            出勤
+                            <form method="POST" action="{% url 'holiday' datetime.year datetime.month datetime.day booking_hour %}">
+                                {% csrf_token %}
+                                <button class="btn btn-light" type="submit">出勤</button>
+                            </form>
                         {% else %}
-                            <p class="mb-0 font-weight-bold text-success">{{ book }}様</p>
+                            {% if book == None %}
+                                <p class="mb-0">休み</p>
+                            {% else %}
+                                <p class="mb-0 font-weight-bold text-success">{{ book }}様</p>
+                            {% endif %}
+                            <form method="POST" action="{% url 'delete' datetime.year datetime.month datetime.day booking_hour %}">
+                                {% csrf_token %}
+                                <button class="btn btn-danger" type="submit">取消</button>
+                            </form>
                         {% endif %}
                     </td>
                     {% endfor %}
@@ -53,7 +64,7 @@
 
     <div class="row">
         <div class="col-md-3 mb-4 text-center mypage">
-            <img src="/{{ staff_data.user.image.url }}" alt="" class="mb-3 img-fluid">
+            <img src="{{ staff_data.user.image.url }}" alt="" class="mb-3 img-fluid">
             <p>{{ staff_data.store.name }}店：{{ staff_data.user.first_name }} {{ staff_data.user.last_name }}</p>
         </div>
         <div class="col-md-9 mb-4">
