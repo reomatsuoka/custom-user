@@ -30,6 +30,12 @@ main {
     object-fit: contain;
 }
 
+/* calendar */
+.calendar img{
+    height: 150px;
+    object-fit: contain;
+}
+
 /* profile */
 .card-profile {
     width: 700px;
