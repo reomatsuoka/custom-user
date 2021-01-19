@@ -41,6 +41,7 @@
                 <tr>
                     <th></th>
                     {% for day in days %}
+                    <!-- 土日に色付けする内容？ -->
                         {% if day.weekday == 5 %}
                             <th scope="col" class="text-primary">{{ day | date:"d(D)" }}</th>
                         {% elif day.weekday == 6 %}
@@ -60,7 +61,7 @@
                                 {% if datetime <= today %}
                                     -
                                 {% elif book %}
-                                    <a href="">
+                                    <a href="{%url 'booking' staff_data.pk datetime.year datetime.month datetime.day hour%}">
                                         <i class="far fa-circle text-info"></i>
                                     </a>
                                 {% else %}
