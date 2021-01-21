@@ -19,6 +19,7 @@ class StoreView(View):
             start_date = date.today()
             weekday = start_date.weekday()
             # カレンダー日曜日開始
+            # weekday 月曜日[0]~日曜日[6]と設定されている。
             if weekday != 6:
                 start_date = start_date - timedelta(days=weekday + 1)
             return redirect('mypage', start_date.year, start_date.month, start_date.day)
@@ -65,6 +66,8 @@ class CalendarView(View):
             calendar[hour] = row
         start_time = make_aware(datetime.combine(start_day, time(hour=10, minute=0, second=0)))
         end_time = make_aware(datetime.combine(end_day, time(hour=20, minute=0, second=0)))
+        # 今週の予約データのみ表示させる。　start__gt=end_timeは今週より前（先週)の予約データを除外する。end__lt=start_timeは
+        # 今週より後（来週)の予約データを除外する
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
             local_time = localtime(booking.start)
